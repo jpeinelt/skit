@@ -2,6 +2,9 @@ package lexer
 
 import (
 	"fmt"
+	"strings"
+	"unicode"
+	"unicode/utf8"
 )
 
 type lexFn func(*Lexer) lexfn
@@ -25,10 +28,6 @@ func (l *Lexer) currentInput() string {
 	return l.input[l.start:l.pos]
 }
 
-func (l *Lexer) dec() {
-	l.pos--
-}
-
 func (l *Lexer) emit(tokenType TokenType) {
 	l.tokens <- Token{tokenType, val: l.input[l.start:l.pos]}
 	l.start = l.pos
@@ -43,19 +42,12 @@ func (l *Lexer) ignore() {
 	l.start = l.pos
 }
 
-func (l *Lexer) inc() {
-	l.pos++
-	if l.pos >= utf8.RuneCountInString(l.input) {
-		l.emit(TOKEN_EOF)
-	}
-}
-
-func (l *Lexer) inputToEnd() string {
+func (l *Lexer) posToEnd() string {
 	return l.input[l.pos:]
 }
 
 func (l *Lexer) isEOF() bool {
-	return l.pos >= len(l.input)
+	return l.pos >= utf8.RuneCountInString(l.input)
 }
 
 func (l *Lexer) isWhitespace() bool {
@@ -70,11 +62,11 @@ func (l *Lexer) next() rune {
 	}
 	result, width := utf8.DecodeRuneInString(l.input[l.pos:])
 	l.width = width
-	l.pos += l.pos
+	l.pos += l.width
 	return result
 }
 
-func (l *Lexer) nextToken() Token {
+func (l *Lexer) NextToken() Token {
 	for {
 		select {
 		case token := <-l.tokens:
@@ -100,19 +92,83 @@ func (l *Lexer) Run() {
 }
 
 func (l *Lexer) shutdown() {
-	clsoe(l.tokens)
+	close(l.tokens)
 }
 
 func (l *Lexer) skipWhitespace() {
 	for {
 		ch := l.next()
 		if !unicode.IsSpace(ch) {
-			l.dec()
 			break
 		}
 		if ch == EOF {
 			l.emit(TOKEN_EOF)
 			break
+		}
+		l.ignore()
+	}
+}
+
+func lexBegin(l *Lexer) lexFn {
+	l.skipWhitespace()
+	if l.isEOF {
+		return nil
+	}
+	if strings.HasPrefix(lexer.inputToEnd(), CONTROL) {
+		return lexControl
+	} else {
+		return lexText
+	}
+}
+
+func lexControl(l *Lexer) lexFn {
+	l.ignore()
+	switch n := l.next(); n {
+	case CONTROL:
+		lexText
+	case TITLE:
+		lexTitle
+	case MEDIA:
+		lexMedia
+	case ALIGN_LEFT:
+		lexAlignLeft
+	case ALIGN_RIGHT:
+		lexAlignRight
+	case ALIGN_CENTER:
+		lexAlignCenter
+	case COLOR_BG:
+		lexColorBg
+	case COLOR_FG:
+		lexColorFg
+	case MONOSPACE:
+		lexMonospace
+	case BULLETPOINT:
+		lexBulletpoint
+	case COMMENT:
+		lexComment
+	default:
+		return l.errorfn(lexerErrorExpectedControl)
+	}
+}
+
+func lexText(l *Lexer) lexFn {
+	for {
+		ch := l.next()
+		if ch == "\n" || ch == EOF {
+			l.backup()
+			l.emit(TOKEN_TEXT)
+			lexBegin
+		}
+	}
+}
+
+func lexTitle(l *Lexer) lexFn {
+	for {
+		ch := l.next()
+		if ch == "\n" || ch == EOF {
+			l.backup()
+			l.emit(TOKEN_TITLE)
+			lexBegin
 		}
 	}
 }

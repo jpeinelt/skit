@@ -20,15 +20,16 @@ const (
 	TOKEN_ALIGN_RIGHT  // >
 	TOKEN_ALIGN_CENTER // =
 
-	TOKEN_COLOR_BG //_
-	TOKEN_COLOR_FG //^
+	TOKEN_COLOR_BG // _
+	TOKEN_COLOR_FG // ^
 
-	TOKEN_MONOSPACE   //'
-	TOKEN_BULLETPOINT //-
-	TOKEN_IGNORE      //!
+	TOKEN_MONOSPACE   // '
+	TOKEN_BULLETPOINT // -
+	TOKEN_COMMENT     // !
 )
 
 const EOF rune = 0
+const CONTROL = "/"
 const TITLE = "#"
 const MEDIA = "@"
 const ALIGN_LEFT = "<"
@@ -38,7 +39,7 @@ const COLOR_BG = "_"
 const COLOR_FG = "^"
 const MONOSPACE = "'"
 const BULLETPOINT = "-"
-const IGNORE = "!"
+const COMMENT = "!"
 
 type Token struct {
 	typ TokenType
