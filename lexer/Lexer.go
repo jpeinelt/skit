@@ -2,7 +2,6 @@ package lexer
 
 import (
 	"fmt"
-	"log"
 	"unicode"
 	"unicode/utf8"
 )
