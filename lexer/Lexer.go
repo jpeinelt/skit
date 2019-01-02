@@ -193,14 +193,38 @@ func lexMedia(l *Lexer) lexFn {
 func lexColorBg(l *Lexer) lexFn {
 	l.ignoreUntilTextInLine()
 	c := l.currentInput()
-	if unicode.IsSpace(c) {
+	if unicode.IsSpace(c) || !unicode.IsNumber(c) {
 		return l.errorFn(lexerErrorExpectedColor)
+	}
+	for {
+		n := l.next()
+		if n == EOF || n == '\n' {
+			l.emit(TOKEN_COLOR_BG)
+			break
+		}
+		if !unicode.IsNumber(c) {
+			return l.errorFn(lexerErrorExpectedColor)
+		}
 	}
 	return lexNewSlide
 }
 
 func lexColorFg(l *Lexer) lexFn {
-
+	l.ignoreUntilTextInLine()
+	c := l.currentInput()
+	if unicode.IsSpace(c) || !unicode.IsNumber(c) {
+		return l.errorFn(lexerErrorExpectedColor)
+	}
+	for {
+		n := l.next()
+		if n == EOF || n == '\n' {
+			l.emit(TOKEN_COLOR_FG)
+			break
+		}
+		if !unicode.IsNumber(c) {
+			return l.errorFn(lexerErrorExpectedColor)
+		}
+	}
 	return lexNewSlide
 }
 
