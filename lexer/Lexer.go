@@ -2,6 +2,7 @@ package lexer
 
 import (
 	"fmt"
+	"log"
 	"unicode"
 	"unicode/utf8"
 )
@@ -68,6 +69,10 @@ func (l *Lexer) next() rune {
 // it loops over doing nothing until we lexed a new Token.
 func (l *Lexer) NextToken() Token {
 	for {
+		if l.state == nil {
+			l.shutdown()
+			return Token{Typ: TOKEN_EOF, Val: ""}
+		}
 		select {
 		case token := <-l.tokens:
 			return token
@@ -153,19 +158,20 @@ func (l *Lexer) ignoreUntilTextInLine() {
 	}
 }
 
-func scanLine(l *Lexer, token TokenType, nextFn lexFn) lexFn {
+func scanLine(l *Lexer, token TokenType) {
 	for {
 		ch := l.next()
 		if ch == '\n' || ch == EOF {
 			l.backup()
 			l.emit(token)
-			return nextFn
+			break
 		}
 	}
 }
 
 func lexText(l *Lexer) lexFn {
-	return scanLine(l, TOKEN_TEXT, lexNewSlide)
+	scanLine(l, TOKEN_TEXT)
+	return lexNewSlide
 }
 
 func lexTitle(l *Lexer) lexFn {
@@ -174,7 +180,8 @@ func lexTitle(l *Lexer) lexFn {
 	if unicode.IsSpace(c) {
 		return l.errorFn(lexerErrorExpectedTitle)
 	}
-	return scanLine(l, TOKEN_TITLE, lexNewSlide)
+	scanLine(l, TOKEN_TITLE)
+	return lexNewSlide
 }
 
 func lexNewSlide(l *Lexer) lexFn {
@@ -193,7 +200,8 @@ func lexMedia(l *Lexer) lexFn {
 	if unicode.IsSpace(c) {
 		return l.errorFn(lexerErrorExpectedMediaURL)
 	}
-	return scanLine(l, TOKEN_MEDIA, lexNewSlide)
+	scanLine(l, TOKEN_MEDIA)
+	return lexNewSlide
 }
 
 func lexColorBg(l *Lexer) lexFn {
@@ -205,6 +213,7 @@ func lexColorBg(l *Lexer) lexFn {
 	for {
 		n := l.next()
 		if n == EOF || n == '\n' {
+			l.backup()
 			l.emit(TOKEN_COLOR_BG)
 			break
 		}
@@ -224,6 +233,7 @@ func lexColorFg(l *Lexer) lexFn {
 	for {
 		n := l.next()
 		if n == EOF || n == '\n' {
+			l.backup()
 			l.emit(TOKEN_COLOR_FG)
 			break
 		}
@@ -236,5 +246,6 @@ func lexColorFg(l *Lexer) lexFn {
 
 func lexComment(l *Lexer) lexFn {
 	l.ignoreUntilTextInLine()
-	return scanLine(l, TOKEN_COMMENT, lexNewSlide)
+	scanLine(l, TOKEN_COMMENT)
+	return lexNewSlide
 }

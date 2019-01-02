@@ -1,9 +1,9 @@
 package lexer
 
 const (
-	lexerErrorUnexpectedEOF    string = "Unexpected end of file."
-	lexerErrorExpectedControl  string = "Expected Control Character or /."
-	lexerErrorExpectedTitle    string = "Expected title text."
-	lexerErrorExpectedMediaURL string = "Expected image or gif path."
-	lexerErrorExpectedColor    string = "Expected color code between 0 and 255."
+	lexerErrorUnexpectedEOF    string = "Lexer: Unexpected end of file."
+	lexerErrorExpectedControl  string = "Lexer: Expected Control Character or /."
+	lexerErrorExpectedTitle    string = "Lexer: Expected title text."
+	lexerErrorExpectedMediaURL string = "Lexer: Expected image or gif path."
+	lexerErrorExpectedColor    string = "Lexer: Expected color code between 0 and 255."
 )

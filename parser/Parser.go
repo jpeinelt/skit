@@ -48,13 +48,14 @@ func Parse(input string) model.Presentation {
 		case lexer.TOKEN_COLOR_BG:
 			c, err := strconv.Atoi(token.Val)
 			if err != nil || c < 0 || c >= 256 {
-				panic("Expected background color code between 0 and 255.")
+				// panic("Parser expected background color code between 0 and 255 but was" + string(c))
+				panic(c)
 			}
 			slide.ColorBg = c
 		case lexer.TOKEN_COLOR_FG:
 			c, err := strconv.Atoi(token.Val)
 			if err != nil || c < 0 || c >= 256 {
-				panic("Expected foreground color code between 0 and 255.")
+				panic("Parser expected foreground color code between 0 and 255.")
 			}
 			slide.ColorFg = c
 		default:
