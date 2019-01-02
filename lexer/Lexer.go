@@ -8,8 +8,10 @@ import (
 
 type lexFn func(*Lexer) lexFn
 
+// Lexer with an input, tokens and a state.
+// Internally it tracks also a start pointer, a position pointer and
+// the width of the current lexed item.
 type Lexer struct {
-	name   string
 	input  string
 	tokens chan Token
 	state  lexFn
@@ -29,12 +31,12 @@ func (l *Lexer) currentInput() rune {
 }
 
 func (l *Lexer) emit(tokenType TokenType) {
-	l.tokens <- Token{typ: tokenType, val: l.input[l.start:l.pos]}
+	l.tokens <- Token{Typ: tokenType, Val: l.input[l.start:l.pos]}
 	l.start = l.pos
 }
 
 func (l *Lexer) errorFn(format string, args ...interface{}) lexFn {
-	l.tokens <- Token{typ: TOKEN_ERROR, val: fmt.Sprintf(format, args...)}
+	l.tokens <- Token{Typ: TOKEN_ERROR, Val: fmt.Sprintf(format, args...)}
 	return nil
 }
 
@@ -62,6 +64,8 @@ func (l *Lexer) next() rune {
 	return result
 }
 
+// NextToken returns the next lexed Token in our channel. If there is none,
+// it loops over doing nothing until we lexed a new Token.
 func (l *Lexer) NextToken() Token {
 	for {
 		select {
@@ -71,7 +75,6 @@ func (l *Lexer) NextToken() Token {
 			l.state = l.state(l)
 		}
 	}
-	panic("Lexer invalid state (nextToken)")
 }
 
 func (l *Lexer) peek() rune {
@@ -80,11 +83,15 @@ func (l *Lexer) peek() rune {
 	return r
 }
 
-func (l *Lexer) Run() {
-	for state := lexBegin; state != nil; {
-		state = state(l)
+// BeginLexing returns a new Lexer with a given input, a start state and
+// a buffered Token channel.
+func BeginLexing(input string) *Lexer {
+	l := &Lexer{
+		input:  input,
+		state:  lexBegin,
+		tokens: make(chan Token, 2),
 	}
-	l.shutdown()
+	return l
 }
 
 func (l *Lexer) shutdown() {
@@ -112,9 +119,8 @@ func lexBegin(l *Lexer) lexFn {
 	}
 	if l.currentInput() == CONTROL {
 		return lexControl
-	} else {
-		return lexText
 	}
+	return lexText
 }
 
 func lexControl(l *Lexer) lexFn {
@@ -185,7 +191,7 @@ func lexMedia(l *Lexer) lexFn {
 	l.ignoreUntilTextInLine()
 	c := l.currentInput()
 	if unicode.IsSpace(c) {
-		return l.errorFn(lexerErrorExpectedMediaUrl)
+		return l.errorFn(lexerErrorExpectedMediaURL)
 	}
 	return scanLine(l, TOKEN_MEDIA, lexNewSlide)
 }
