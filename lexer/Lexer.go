@@ -2,18 +2,17 @@ package lexer
 
 import (
 	"fmt"
-	"strings"
 	"unicode"
 	"unicode/utf8"
 )
 
-type lexFn func(*Lexer) lexfn
+type lexFn func(*Lexer) lexFn
 
 type Lexer struct {
 	name   string
 	input  string
 	tokens chan Token
-	state  lexfn
+	state  lexFn
 
 	start int
 	pos   int
@@ -24,17 +23,18 @@ func (l *Lexer) backup() {
 	l.pos -= l.width
 }
 
-func (l *Lexer) currentInput() string {
-	return l.input[l.start:l.pos]
+func (l *Lexer) currentInput() rune {
+	r, _ := utf8.DecodeRuneInString(l.input[l.start:l.pos])
+	return r
 }
 
 func (l *Lexer) emit(tokenType TokenType) {
-	l.tokens <- Token{tokenType, val: l.input[l.start:l.pos]}
+	l.tokens <- Token{typ: tokenType, val: l.input[l.start:l.pos]}
 	l.start = l.pos
 }
 
-func (l *Lexer) errorfn(format string, args ...interface{}) lexFn {
-	l.tokens <- Token{TOKEN_ERROR, val: fmt.Sprintf(format, args...)}
+func (l *Lexer) errorFn(format string, args ...interface{}) lexFn {
+	l.tokens <- Token{typ: TOKEN_ERROR, val: fmt.Sprintf(format, args...)}
 	return nil
 }
 
@@ -107,10 +107,10 @@ func (l *Lexer) skipWhitespace() {
 
 func lexBegin(l *Lexer) lexFn {
 	l.skipWhitespace()
-	if l.isEOF {
+	if l.isEOF() {
 		return nil
 	}
-	if strings.HasPrefix(lexer.currentInput(), CONTROL) {
+	if l.currentInput() == CONTROL {
 		return lexControl
 	} else {
 		return lexText
@@ -121,19 +121,19 @@ func lexControl(l *Lexer) lexFn {
 	l.ignore()
 	switch n := l.next(); n {
 	case CONTROL:
-		lexText
+		return lexText
 	case TITLE:
-		lexTitle
+		return lexTitle
 	case MEDIA:
-		lexMedia
+		return lexMedia
 	case COLOR_BG:
-		lexColorBg
+		return lexColorBg
 	case COLOR_FG:
-		lexColorFg
+		return lexColorFg
 	case COMMENT:
-		lexComment
+		return lexComment
 	default:
-		return l.errorfn(lexerErrorExpectedControl)
+		return l.errorFn(lexerErrorExpectedControl)
 	}
 }
 
@@ -141,7 +141,7 @@ func (l *Lexer) ignoreUntilTextInLine() {
 	for {
 		l.ignore()
 		n := l.next()
-		if !unicode.IsSpace(n) || n == "\n" || n == EOF {
+		if !unicode.IsSpace(n) || n == '\n' || n == EOF {
 			break
 		}
 	}
@@ -150,10 +150,10 @@ func (l *Lexer) ignoreUntilTextInLine() {
 func scanLine(l *Lexer, token TokenType, nextFn lexFn) lexFn {
 	for {
 		ch := l.next()
-		if ch == "\n" || ch == EOF {
+		if ch == '\n' || ch == EOF {
 			l.backup()
 			l.emit(token)
-			nextFn
+			return nextFn
 		}
 	}
 }
@@ -174,11 +174,11 @@ func lexTitle(l *Lexer) lexFn {
 func lexNewSlide(l *Lexer) lexFn {
 	n := l.next()
 	p := l.peek()
-	if n == "\n" && p == "\n" {
+	if n == '\n' && p == '\n' {
 		l.emit(TOKEN_NEWSLIDE)
 	}
 	l.ignore()
-	lexBegin
+	return lexBegin
 }
 
 func lexMedia(l *Lexer) lexFn {
@@ -192,19 +192,19 @@ func lexMedia(l *Lexer) lexFn {
 
 func lexColorBg(l *Lexer) lexFn {
 	l.ignoreUntilTextInLine()
-	c := lcurrentInput()
+	c := l.currentInput()
 	if unicode.IsSpace(c) {
 		return l.errorFn(lexerErrorExpectedColor)
 	}
-	lexNewSlide
+	return lexNewSlide
 }
 
 func lexColorFg(l *Lexer) lexFn {
 
-	lexNewSlide
+	return lexNewSlide
 }
 
 func lexComment(l *Lexer) lexFn {
 	l.ignoreUntilTextInLine()
-	return scanline(l, TOKEN_COMMENT, lexNewSlide)
+	return scanLine(l, TOKEN_COMMENT, lexNewSlide)
 }

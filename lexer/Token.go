@@ -23,12 +23,12 @@ const (
 )
 
 const EOF rune = 0
-const CONTROL = "/"
-const TITLE = "#"
-const MEDIA = "@"
-const COLOR_BG = "_"
-const COLOR_FG = "^"
-const COMMENT = "!"
+const CONTROL = '/'
+const TITLE = '#'
+const MEDIA = '@'
+const COLOR_BG = '_'
+const COLOR_FG = '^'
+const COMMENT = '!'
 
 type Token struct {
 	typ TokenType
