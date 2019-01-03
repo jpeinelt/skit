@@ -87,10 +87,6 @@ func skitFile(fileName string) {
 }
 
 func present() {
-	// ascii converter
-	convertOptions.FixedWidth = 80
-	convertOptions.FixedHeight = 40
-
 	// create UI
 	g, err := gocui.NewGui(gocui.Output256)
 	if err != nil {
@@ -128,6 +124,10 @@ func initKeybindings(g *gocui.Gui) error {
 
 func newView(g *gocui.Gui, slide model.Slide) error {
 	maxX, maxY := g.Size()
+	// ascii converter
+	convertOptions.FixedWidth = maxX
+	convertOptions.FixedHeight = maxY
+	// slide colors
 	if len(slide.Media) > 0 {
 		g.BgColor = gocui.Attribute(termbox.ColorBlack)
 		g.FgColor = gocui.Attribute(termbox.ColorWhite)
@@ -144,8 +144,6 @@ func newView(g *gocui.Gui, slide model.Slide) error {
 		title := fmt.Sprintf(" %v ", slide.Title)
 		v.Title = title
 		if len(slide.Media) > 0 {
-			g.BgColor = gocui.Attribute(termbox.ColorBlack)
-			g.FgColor = gocui.Attribute(termbox.ColorBlack)
 			fmt.Fprint(v, converter.ImageFile2ASCIIString(slide.Media, &convertOptions))
 		} else {
 			text := fmt.Sprintf("\n\n\n%v", slide.Text)
