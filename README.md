@@ -1,6 +1,12 @@
 # Skit
 a basic presentation app for the command line
 
+`→` next slide
+
+`←` previous slide
+
+`Ctrl-C` quit
+
 ![Screenshot with Text](/slide-text.png?raw=true)
 ![Screenshot with Image](/slide-image.png?raw=true)
 
@@ -36,14 +42,6 @@ This program supports the following file types:
 - .jpg
 - .png
 
-
-### Themes
-
-
-- Two color themes:
-  - Foreground: #ffffff by default
-  - Background: #000000 by default
-
 ## Installing and Contributing
 
 Install with:
@@ -61,9 +59,9 @@ Contributions are always welcome
     really simple presentation software. Thank you Karl!
 
 ### Lexer and Parser
-[Lexing in Go][rob-pike] - Rob Pike Talking about Lexing
+[Lexing in Go][rob-pike] - Rob Pike talk about lexing
 
-[Ini Parser][ini-parser] - Simple Parser, also inspired by Rob Pike's talk
+[Ini Parser][ini-parser] - Simple parser, also inspired by Rob Pike's talk
 
 ### UI
 [slack-term][slack-term] - Slack client for the CLI
