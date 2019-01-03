@@ -1,6 +1,12 @@
 # Skit
 a basic presentation app for the command line
 
+`→` next slide
+
+`←` previous slide
+
+`Ctrl-C` to quit
+
 ![Screenshot with Text](/slide-text.png?raw=true)
 ![Screenshot with Image](/slide-image.png?raw=true)
 
