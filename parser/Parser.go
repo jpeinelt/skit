@@ -33,6 +33,9 @@ func Parse(input string) model.Presentation {
 		case lexer.TOKEN_ERROR:
 			panic(token.Val)
 		case lexer.TOKEN_NEWSLIDE:
+			if len(slide.Title) == 0 {
+				panic("Parser expected title for slide")
+			}
 			output.Slides = append(output.Slides, slide)
 			slide = model.Slide{}
 		case lexer.TOKEN_TEXT:
