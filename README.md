@@ -1,6 +1,9 @@
 # Skit
 a basic presentation app for the command line
 
+![Screenshot with Text](/slide-text.png?raw=true)
+![Screenshot with Image](/slide-image.png?raw=true)
+
 ## Table Of Contents
 
 - [Table Of Contets](#table-of-contents)
@@ -59,6 +62,7 @@ Contributions are always welcome
 
 ### Lexer and Parser
 [Lexing in Go][rob-pike] - Rob Pike Talking about Lexing
+
 [Ini Parser][ini-parser] - Simple Parser, also inspired by Rob Pike's talk
 
 ### UI
