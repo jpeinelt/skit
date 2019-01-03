@@ -4,18 +4,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"peek/model"
-	"peek/parser"
-
-	termbox "github.com/nsf/termbox-go"
-
-	"github.com/jpeinelt/image2ascii/convert"
 
 	_ "image/jpeg"
 	_ "image/png"
 
 	"github.com/jpeinelt/gocmd"
 	"github.com/jpeinelt/gocui"
+	"github.com/jpeinelt/image2ascii/convert"
+	"github.com/jpeinelt/skit/model"
+	"github.com/jpeinelt/skit/parser"
+	termbox "github.com/jpeinelt/termbox-go"
 )
 
 var (

@@ -2,9 +2,10 @@ package parser
 
 import (
 	"log"
-	"peek/lexer"
-	"peek/model"
 	"strconv"
+
+	"github.com/jpeinelt/skit/lexer"
+	"github.com/jpeinelt/skit/model"
 )
 
 func isEOF(token lexer.Token) bool {
